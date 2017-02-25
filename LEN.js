@@ -62,7 +62,7 @@
 	// commonFn  自定义的存在兼容性问题的方法
 	function forEach(arr , fn){
 		if(support.forEach){
-			arr.forEach(function(v,i){
+			[].forEach.call(arr,function(v,i){
 				fn(v,i);
 			});
 		} else {
@@ -232,7 +232,7 @@ LEN.fn.extend({
 		var newObj = LEN(); //函数内的this仅指向单一对象，若需要为多个dom添加子元素，需要对this进行克隆，为满足链式编程，需改变return的内容，包含所有克隆出来的对象
 		this.each(function(v,i){
 			for(var j = 0 ; j < LENobj.length ; j++){ //若appendTo后面的LEN对象包含多个对象，则需要为每一个内部对象都添加对应的HTML
-				var temp =  j == LENobj.length-1 ? v : v.clone(true);  //判断是否是循环的最后一次，若是最后一次则不用克隆，使用最开始的元素即可
+				var temp =  j == LENobj.length-1 ? v : v.cloneNode(true);  //判断是否是循环的最后一次，若是最后一次则不用克隆，使用最开始的元素即可
 				push.call(newObj , temp);
 				LENobj[j].appendChild(temp);
 			}
@@ -248,9 +248,9 @@ LEN.fn.extend({
 		var newObj = this.constructor(); //函数内的this仅指向单一对象，若需要为多个dom添加子元素，需要对this进行克隆，为满足链式编程，需改变return的内容，包含所有克隆出来的对象
 		this.each(function(v,i){
 			for(var j = 0 ; j < LENobj.length ; j++){ //若appendTo后面的LEN对象包含多个对象，则需要为每一个内部对象都添加对应的HTML
-				var temp =  j == LENobj.length-1 ? v : v.clone(true);  //判断是否是循环的最后一次，若是最后一次则不用克隆，使用最开始的元素即可
+				var temp =  j == LENobj.length-1 ? v : v.cloneNode(true);  //判断是否是循环的最后一次，若是最后一次则不用克隆，使用最开始的元素即可
 				push.call(newObj , temp);
-				prependChild( LENobj[j],temp);
+				LEN.fn.prependChild( LENobj[j],temp);
 			}
 		});
 		return newObj;
