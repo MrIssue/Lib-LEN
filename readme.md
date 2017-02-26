@@ -1,4 +1,2 @@
 readme file
-jQuery源码学习
-js
-new message
+仿jQuery结构，封装个人库LEN。
