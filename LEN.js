@@ -17,7 +17,12 @@
 		}
 		return false ; 
 	};
-
+	var isString = function(str){
+		if(typeof str == 'string'){
+			return true;
+		}
+		return false;
+	};
 
 	// 浏览器能力检查
 	//判断浏览器是否自带原生的方法
@@ -53,6 +58,8 @@
 		}
 		return false ; 
 	})();
+
+
 
 
 
@@ -112,6 +119,13 @@
 			return str;
 		}
 	};
+	function getStyle(dom , style){
+		if(dom.currentStyle){
+			return dom.currentStyle(style);
+		} else {
+			return window.getComputedStyle(dom)[style];
+		}
+	}
 	
 
 	//主体
@@ -210,6 +224,11 @@
 		}
 	};
 
+
+	//工具
+	LEN.extend({
+		isString : isString
+	});
 
 //选择器
 var select = (function(){
@@ -439,6 +458,7 @@ LEN.fn.extend({
 					fn(e);
 				};
 			});
+			return this ;
 		},
 		off:function(type){
 			this.each(function(v,i){
@@ -446,10 +466,12 @@ LEN.fn.extend({
 					v['on'+type] = null;
 				}
 			});
+			return this ;
 		},
 		hover:function(fn1,fn2){
 			this.on("mouseover" , fn1);
 			this.on("mouseout", fn2);
+			return this ;
 		},
 
 		toggle:function(){   //轮流执行，传入的各函数
@@ -457,23 +479,175 @@ LEN.fn.extend({
 			var i = 0 ;
 			this.on('click' , function(){
 				arg[i]();
-				i++
+				i++;
 				i = i % arg.length ;
 			});
+			return this ;
 		}
 	});
 
 
 
+//样式
+	LEN.fn.extend({
+		css:function(obj){
+			var arg = arguments; 
+			var len = arguments.length;
+			var o = {};
+			if(len === 1){
+				if(LEN.isString(obj)){
+					return this[0].style[obj] || getStyle(this[0],obj);
+				}
+				if(typeof obj == 'object'){
+					for(var k in obj){
+						this.each(function(v,i){
+							v.style[k] = obj[k];
+						});
+					}
+				}
+			} else if(len === 2){
+				if(LEN.isString(arg[0]) && LEN.isString(arg[1])) {
+					this.each(function(v,i){
+						v.style[arg[0]] = arg[1];
+					});
+				}
+			}
+			return this;
+		},
+		addClass: function( name ){
+			// var that = this;
+			this.each(function(v,i){
+				var className = v.className;
+				if(className){
+					if(indexOf(' '+ className + ' ' , ' '+ name +' ') == -1){
+						v.className += (' '+name);
+					}
+				} else {
+					v.className = name;
+				}
+			});
+			return this ;
+		},
+		removeClass:function(name){
+			this.each(function(v,i){
+				if(v.className){
+					while(indexOf(' '+ v.className + ' ' , ' '+ name +' ') != -1){
+						v.className = trim((' '+ v.className + ' ').replace(' '+ name +' ' , ''));
+					}
+				}
+			});
+			return this;
+		},
+		hasClass:function( name ){
+			var flag = false ;
+			this.each(function(v,i){
+				if(indexOf(' '+ v.className + ' ' , ' '+ name +' ') != -1){
+					flag = true ; 
+					return;
+				}
+			});
+			return flag ;
+		},
+
+
+		// removeClass:function(name){
+		// 	var rclassName = new RegExp(' ' + name + ' ' , 'g');
+		// 	this.each(function(v,i){
+		// 		if(v.className){
+		//			v.className = v.className.replace( /\s/ , '  ' );  //重点注意，单个空壳会导致连续出现的相同类名，无法全部移除.  
+		// 			v.className = (' '+ v.className + ' ').replace(rclassName , ' ');
+		// 		}
+		// 	});
+		// 	return this;
+		// }
+
+		toggleClass:function(name){
+			if(this.hasClass(name)){
+				this.removeClass(name);
+			} else {
+				this.addClass(name);
+			}
+		}
+	});
 
 
 
+	//属性
+	LEN.fn.extend({
+		attr:function( name , val){  //自定义属性
+			if(val){
+				if(isString(name) && isString(val)){
+					this.each(function(v,i){
+						v.setAttribute(name , val);
+					});
+					return this;
+				} 
+			} else {
+				if(isString(name)){
+					return this[0].getAttribute(name);
+				}
+			}
+			return this ;
+		},
+		prop:function(name , val ){  //原生自带属性
+			if(val){
+				if(isString(name) && isString(val)){
+					this.each(function(v,i){
+						v[name] =val;
+					});
+					return this;
+				} 
+			} else {
+				if(isString(name)){
+					return this[0][name];
+				}
+			}
+			return this ;
+		},
+		val:function(val){
+			this.attr('value',val);
+			return this;
+		},
+		html:function(html){
+			this.prop('innerHTML' , html);
+		},
+		text:function(text){
+			if(text){
+				this.each(function(v){
+					v.innerHTML = '';
+					v.appendChild(document.createTextNode(text+''));
+
+				});
+				return this ;
+
+			} else {
+				var res = '';
+				var list = [];
+				this.each(function(v){
+					res+=getText(v).join(' ');
+				});
+				return res;
+			}
+		
+			
+			function getText (node){
+				for (var i = 0; i < node.childNodes.length; i++) {
+					if(node.childNodes[i].nodeType == 3 ){
+						list.push(node.childNodes[i].nodeValue);
+					} else if(node.childNodes[i].nodeType == 1 ){
+						getText(node.childNodes[i]);
+					}
+				}
+				return list ;
+			}
 
 
 
+		}
 
 
 
+	});
 
 
 
