@@ -637,12 +637,9 @@
                 }
                 return list;
             }
-
-
         }
-
-
     });
+
 
 
     window.LEN = LEN;
